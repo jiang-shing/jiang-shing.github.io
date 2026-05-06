@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>九紫金線長老院 — 佛堂籌備基金</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root{
+    --gold:#8B6B3D;--gold-light:#C8A46A;--gold-pale:#EDE0CC;
+    --cream:#FAF7F2;--cream-dark:#F0EAE0;
+    --text:#2C2416;--text-sub:#7A6A54;
+    --border:#DDD0BB;--card:#FFFFFF;
+    --shadow:0 2px 16px rgba(139,107,61,0.10);--r:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{min-height:100%;background:var(--cream);color:var(--text);font-family:'Noto Sans TC',sans-serif;}
+ 
+  /* NAV */
+  .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(250,247,242,0.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;height:52px;}
+  .nav-logo{font-family:'Noto Serif TC',serif;font-size:13px;color:var(--gold);font-weight:700;letter-spacing:0.06em;}
+  .nav-actions{display:flex;gap:8px;}
+  .nav-btn{font-family:'Noto Sans TC',sans-serif;font-size:12px;font-weight:500;padding:6px 13px;border-radius:99px;border:1.5px solid var(--gold);cursor:pointer;transition:all .2s;white-space:nowrap;}
+  .nav-btn.outline{background:transparent;color:var(--gold);}
+  .nav-btn.outline:hover{background:var(--gold);color:#fff;}
+  .nav-btn.solid{background:var(--gold);color:#fff;}
+  .nav-btn.solid:hover{background:#6e5230;}
+ 
+  .page{display:none;padding-top:52px;min-height:100vh;}
+  .page.active{display:block;}
+  /* public-only mode hides nav admin btn */
+  body.public-only .nav-actions{display:none;}
+  body.public-only .nav{justify-content:center;}
+ 
+  /* ── PUBLIC BOARD ── */
+  .board-wrap{max-width:600px;margin:0 auto;padding:2rem 1rem 3rem;}
+  .board-header{text-align:center;padding:1.5rem 0 1.8rem;}
+  .main-title{font-family:'Noto Serif TC',serif;font-size:21px;font-weight:900;letter-spacing:0.1em;line-height:1.5;}
+  .divider-line{width:44px;height:2px;background:var(--gold);margin:12px auto;border-radius:2px;}
+  .subtitle{font-size:13px;color:var(--text-sub);letter-spacing:0.05em;}
+ 
+  .metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.1rem;}
+  .metric-card{background:var(--card);border-radius:var(--r);padding:1.1rem 0.8rem;text-align:center;border:1px solid var(--border);box-shadow:var(--shadow);}
+  .metric-label{font-size:11px;color:var(--text-sub);letter-spacing:0.04em;margin-bottom:8px;}
+  .metric-value{font-size:21px;font-weight:700;color:var(--text);line-height:1;}
+  .metric-value.gold{color:var(--gold);}
+  .metric-unit{font-size:11px;color:var(--text-sub);margin-top:4px;}
+ 
+  .card-sec{background:var(--card);border-radius:var(--r);padding:1.2rem 1.3rem;margin-bottom:1.1rem;border:1px solid var(--border);box-shadow:var(--shadow);}
+  .card-title{font-size:14px;font-weight:700;margin-bottom:12px;}
+  .prog-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .prog-lbl{font-size:14px;font-weight:700;}
+  .prog-pct{font-size:14px;font-weight:700;color:var(--gold);}
+  .prog-track{background:var(--cream-dark);border-radius:99px;height:11px;overflow:hidden;}
+  .prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold-light),var(--gold));transition:width 1.4s cubic-bezier(.4,0,.2,1);}
+  .prog-note{font-size:12px;color:var(--text-sub);margin-top:8px;}
+ 
+  .chart-legend{display:flex;gap:14px;margin-bottom:10px;}
+  .leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-sub);}
+  .leg-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+  .leg-dash{width:18px;height:0;border-top:2px dashed #8B6B3D;opacity:0.6;}
+ 
+  /* 了愿明細 */
+  .detail-table{width:100%;border-collapse:collapse;}
+  .detail-table thead tr{border-bottom:1.5px solid var(--border);}
+  .detail-table th{font-size:11px;font-weight:600;color:var(--text-sub);padding:7px 8px;text-align:left;letter-spacing:0.03em;}
+  .detail-table th:last-child{text-align:right;}
+  .detail-table tbody tr{border-bottom:1px solid rgba(221,208,187,.35);}
+  .detail-table tbody tr:last-child{border-bottom:none;}
+  .detail-table td{font-size:13px;padding:8px 8px;}
+  .detail-table td:first-child{color:var(--text-sub);font-size:12px;white-space:nowrap;}
+  .detail-table td:last-child{text-align:right;font-weight:600;color:var(--gold);}
+  .detail-empty{text-align:center;color:var(--text-sub);font-size:13px;padding:1.5rem 0;}
+ 
+  /* 了愿專款帳戶 */
+  .account-box{background:linear-gradient(135deg,#fdf6ec,#f5e8d0);border:1.5px solid var(--gold-pale);border-radius:var(--r);padding:1.2rem 1.3rem;margin-bottom:1.1rem;}
+  .account-box-title{font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+  .account-info{font-size:13px;color:var(--text);line-height:2;white-space:pre-wrap;word-break:break-all;}
+ 
+  .board-footer{text-align:center;font-size:11px;color:var(--text-sub);line-height:1.8;}
+  .board-footer-row{display:flex;justify-content:space-between;font-size:11px;color:var(--text-sub);margin-top:8px;}
+ 
+  /* ── ADMIN ── */
+  .admin-wrap{max-width:700px;margin:0 auto;padding:2rem 1rem 4rem;}
+  .admin-header{margin-bottom:1.75rem;}
+  .admin-title{font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;margin-bottom:4px;}
+  .admin-subtitle{font-size:13px;color:var(--text-sub);}
+ 
+  .admin-card{background:var(--card);border-radius:var(--r);padding:1.4rem 1.5rem;margin-bottom:1.1rem;border:1px solid var(--border);box-shadow:var(--shadow);}
+  .admin-card-title{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid var(--border);}
+ 
+  .field-group{display:grid;gap:12px;}
+  .field-row{display:flex;flex-direction:column;gap:5px;}
+  .field-row.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .field-label{font-size:12px;font-weight:500;color:var(--text-sub);}
+  .field-hint{font-size:11px;color:#aaa;margin-top:2px;}
+  .field-input{width:100%;font-size:14px;font-family:'Noto Sans TC',sans-serif;color:var(--text);background:var(--cream);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;outline:none;transition:border-color .2s;}
+  .field-input:focus{border-color:var(--gold);}
+  textarea.field-input{resize:vertical;min-height:90px;line-height:1.7;}
+ 
+  .month-table{width:100%;border-collapse:collapse;}
+  .month-table th,.month-table td{padding:7px 8px;font-size:13px;text-align:left;}
+  .month-table th{color:var(--text-sub);font-weight:500;font-size:11px;border-bottom:1px solid var(--border);}
+  .month-table tr:not(:last-child) td{border-bottom:1px solid rgba(221,208,187,.4);}
+  .month-table td:last-child{text-align:right;}
+  .m-input{width:100%;font-size:13px;font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--text);border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;outline:none;transition:border-color .2s;text-align:right;}
+  .m-input:focus{border-color:var(--gold);}
+ 
+  /* Detail editor */
+  .detail-editor-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .add-row-btn{background:var(--gold);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:background .2s;}
+  .add-row-btn:hover{background:#6e5230;}
+  .detail-editor-table{width:100%;border-collapse:collapse;}
+  .detail-editor-table th{font-size:11px;color:var(--text-sub);font-weight:500;padding:6px 8px;border-bottom:1px solid var(--border);text-align:left;}
+  .detail-editor-table td{padding:5px 4px;border-bottom:1px solid rgba(221,208,187,.3);vertical-align:middle;}
+  .detail-editor-table tbody tr:last-child td{border-bottom:none;}
+  .de-input{width:100%;font-size:13px;font-family:'Noto Sans TC',sans-serif;color:var(--text);background:var(--cream);border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;outline:none;transition:border-color .2s;}
+  .de-input:focus{border-color:var(--gold);}
+  .de-input.amt{text-align:right;}
+  .del-btn{background:none;border:none;cursor:pointer;color:#c0a090;font-size:16px;padding:4px 6px;border-radius:6px;transition:color .2s,background .2s;}
+  .del-btn:hover{color:#a33;background:rgba(180,50,50,.08);}
+ 
+  /* Share */
+  .share-info-box{background:linear-gradient(135deg,#fdf6ec,#f5e8d0);border:1px solid var(--gold-pale);border-radius:10px;padding:14px 16px;margin-bottom:14px;}
+  .share-info-title{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:8px;}
+  .share-info-body{font-size:12px;color:var(--text-sub);line-height:1.8;}
+  .share-url-row{display:flex;gap:8px;align-items:center;margin-top:10px;}
+  .share-url-input{flex:1;font-size:13px;font-family:monospace;color:var(--text);background:var(--cream);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;outline:none;transition:border-color .2s;}
+  .share-url-input:focus{border-color:var(--gold);}
+  .copy-url-btn{background:var(--gold);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;font-family:'Noto Sans TC',sans-serif;cursor:pointer;white-space:nowrap;transition:background .2s;}
+  .copy-url-btn:hover{background:#6e5230;}
+ 
+  .action-btn{width:100%;padding:12px;border-radius:var(--r);font-size:15px;font-weight:700;font-family:'Noto Serif TC',serif;letter-spacing:0.06em;cursor:pointer;transition:all .2s;border:none;margin-bottom:8px;display:block;}
+  .action-btn.gold-solid{background:var(--gold);color:#fff;box-shadow:0 4px 20px rgba(139,107,61,.3);}
+  .action-btn.gold-solid:hover{background:#6e5230;}
+  .action-btn.gold-outline{background:transparent;color:var(--gold);border:2px solid var(--gold);}
+  .action-btn.gold-outline:hover{background:var(--gold-pale);}
+  .action-btn.dark{background:var(--text);color:#fff;}
+  .action-btn.dark:hover{background:#1a1008;}
+ 
+  .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;border-radius:99px;padding:10px 22px;font-size:13px;font-weight:500;z-index:999;transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s;opacity:0;pointer-events:none;}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+ 
+  @media(max-width:480px){
+    .metrics-grid{grid-template-columns:repeat(2,1fr);}
+    .field-row.two-col{grid-template-columns:1fr;}
+    .board-footer-row{flex-direction:column;gap:2px;text-align:center;}
+  }
+</style>
+</head>
+<body>
+ 
+<nav class="nav">
+  <div class="nav-logo">九紫金線長老院</div>
+  <div class="nav-actions">
+    <button class="nav-btn outline" onclick="showPage('public')">📋 公開看板</button>
+    <button class="nav-btn solid" onclick="showPage('admin')">⚙ 後台管理</button>
+  </div>
+</nav>
+ 
+<!-- ════ PUBLIC BOARD ════ -->
+<div class="page active" id="page-public">
+  <div class="board-wrap">
+    <div class="board-header">
+      <div class="main-title">九紫金線長老院　佛堂籌備基金</div>
+      <div class="divider-line"></div>
+      <div class="subtitle">了愿透明化專區 · <span id="pub-year">2025</span>年度公開看板</div>
+    </div>
+ 
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">年度目標金額</div>
+        <div class="metric-value gold" id="pub-target">$500,000</div>
+        <div class="metric-unit">新台幣</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">了愿金額</div>
+        <div class="metric-value" id="pub-raised">$342,000</div>
+        <div class="metric-unit">新台幣</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">達成率</div>
+        <div class="metric-value gold" id="pub-rate">68.4%</div>
+        <div class="metric-unit">累計至今</div>
+      </div>
+    </div>
+ 
+    <div class="card-sec">
+      <div class="prog-row">
+        <span class="prog-lbl">整體募款進度</span>
+        <span class="prog-pct" id="pub-pct-lbl">68.4%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="pub-prog-fill" style="width:0%"></div></div>
+      <div class="prog-note" id="pub-prog-note"></div>
+    </div>
+ 
+    <div class="card-sec">
+      <div class="card-title">月度募款走勢</div>
+      <div class="chart-legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#C8A46A"></div>當月了愿</div>
+        <div class="leg-item"><div class="leg-dash"></div>月度目標基準</div>
+      </div>
+      <div style="position:relative;height:180px;"><canvas id="pub-chart"></canvas></div>
+    </div>
+ 
+    <div class="card-sec">
+      <div class="card-title">了愿明細</div>
+      <table class="detail-table">
+        <thead><tr><th>日期</th><th>了愿金額</th></tr></thead>
+        <tbody id="pub-detail-body">
+          <tr><td colspan="2" class="detail-empty">尚無明細資料</td></tr>
+        </tbody>
+      </table>
+    </div>
+ 
+    <!-- 了愿專款帳戶 -->
+    <div class="account-box">
+      <div class="account-box-title">🏦 了愿專款帳戶</div>
+      <div class="account-info" id="pub-account-info">（尚未設定）</div>
+    </div>
+ 
+    <div class="board-footer">所有款項專款專用 · 每季更新帳務明細 · 資料更新時間：<span id="pub-update-date">2025/05/05</span></div>
+    <div class="board-footer-row">
+      <span>九紫金線長老院-財務部</span>
+      <span>本專區每季更新</span>
+    </div>
+  </div>
+</div>
+ 
+<!-- ════ ADMIN ════ -->
+<div class="page" id="page-admin">
+  <div class="admin-wrap">
+    <div class="admin-header">
+      <div class="admin-title">⚙ 後台管理介面</div>
+      <div class="admin-subtitle">填寫完成後按「儲存設定」，再下載公開看板發送給大眾。</div>
+    </div>
+ 
+    <!-- 基本資訊 -->
+    <div class="admin-card">
+      <div class="admin-card-title">📋 基本資訊</div>
+      <div class="field-group">
+        <div class="field-row">
+          <label class="field-label">年度</label>
+          <input class="field-input" type="text" id="inp-year" value="2025">
+        </div>
+        <div class="field-row two-col">
+          <div>
+            <label class="field-label">年度目標金額（元）</label>
+            <input class="field-input" type="number" id="inp-target" value="500000" min="0">
+          </div>
+          <div>
+            <label class="field-label">了愿金額（元）</label>
+            <input class="field-input" type="number" id="inp-raised" value="342000" min="0">
+          </div>
+        </div>
+        <div class="field-row two-col">
+          <div>
+            <label class="field-label">募款起始日期</label>
+            <input class="field-input" type="date" id="inp-start" value="2025-01-01">
+          </div>
+          <div>
+            <label class="field-label">募款結束日期</label>
+            <input class="field-input" type="date" id="inp-end" value="2025-12-31">
+          </div>
+        </div>
+        <div class="field-row">
+          <label class="field-label">資料更新日期</label>
+          <input class="field-input" type="date" id="inp-date" value="2025-05-05">
+        </div>
+      </div>
+    </div>
+ 
+    <!-- 了愿專款帳戶 -->
+    <div class="admin-card">
+      <div class="admin-card-title">🏦 了愿專款帳戶資訊</div>
+      <div class="field-group">
+        <div class="field-row">
+          <label class="field-label">帳戶資訊（將顯示於前台，可多行填寫）</label>
+          <textarea class="field-input" id="inp-account" placeholder="例：
+銀行：○○銀行 永和分行
+帳號：123-456-789012
+戶名：九紫金線長老院
+如有疑問請洽財務部"></textarea>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- 月度資料 -->
+    <div class="admin-card">
+      <div class="admin-card-title">📊 月度了愿資料</div>
+      <table class="month-table">
+        <thead><tr><th>月份</th><th style="text-align:right">了愿金額（元，空白＝尚無資料）</th></tr></thead>
+        <tbody id="month-table-body"></tbody>
+      </table>
+    </div>
+ 
+    <!-- 了愿明細 -->
+    <div class="admin-card">
+      <div class="admin-card-title">📝 了愿明細管理</div>
+      <div class="detail-editor-header">
+        <span style="font-size:12px;color:var(--text-sub);">可新增、編輯或刪除每筆了愿明細。</span>
+        <button class="add-row-btn" onclick="addDetailRow()">＋ 新增一筆</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="detail-editor-table">
+          <thead>
+            <tr>
+              <th style="min-width:120px">日期</th>
+              <th style="min-width:110px;text-align:right">了愿金額（元）</th>
+              <th style="width:36px"></th>
+            </tr>
+          </thead>
+          <tbody id="detail-editor-body"></tbody>
+        </table>
+      </div>
+    </div>
+ 
+    <!-- 分享 -->
+    <div class="admin-card">
+      <div class="admin-card-title">🔗 分享公開看板給大眾</div>
+      <div class="share-info-box">
+        <div class="share-info-title">📤 分享方式</div>
+        <div class="share-info-body">
+          <strong>方式一（推薦）：</strong>點下方「下載公開看板 HTML 檔」，將檔案傳送給大眾，對方用瀏覽器開啟即可。下載的檔案只含前台，<u>不含後台管理</u>。<br><br>
+          <strong>方式二：</strong>若您已將看板上傳至網頁空間，可在下方填入網址供複製分享。
+        </div>
+        <div class="share-url-row">
+          <input class="share-url-input" type="url" id="inp-share-url" placeholder="https://yoursite.com/board.html">
+          <button class="copy-url-btn" onclick="copyShareUrl()">複製</button>
+        </div>
+      </div>
+      <button class="action-btn gold-solid" onclick="downloadPublicBoard()">⬇ 下載公開看板 HTML 檔（純前台）</button>
+      <button class="action-btn gold-outline" onclick="previewPublicBoard()">👁 預覽公開看板效果</button>
+    </div>
+ 
+    <button class="action-btn dark" onclick="saveSettings()">💾 儲存設定</button>
+  </div>
+</div>
+ 
+<div class="toast" id="toast"></div>
+ 
+<script>
+const MONTHS=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+ 
+var state={
+  year:'2025', target:500000, raised:342000,
+  startDate:'2025-01-01', endDate:'2025-12-31',
+  updateDate:'2025-05-05', shareUrl:'',
+  accountInfo:'銀行：○○銀行 永和分行\n帳號：123-456-789012\n戶名：九紫金線長老院\n如有疑問請洽財務部',
+  monthData:[28000,35000,42000,51000,38000,null,null,null,null,null,null,null],
+  details:[
+    {date:'2025-05-01',amount:30000},
+    {date:'2025-04-28',amount:20000},
+    {date:'2025-04-25',amount:15000}
+  ]
+};
+ 
+var chartInst=null;
+ 
+window.onload=function(){
+  // Check if public-only mode
+  var params=new URLSearchParams(window.location.search);
+  if(params.get('view')==='public'){
+    document.body.classList.add('public-only');
+    // Load state from URL data param if present
+    if(params.get('d')){
+      try{ Object.assign(state,JSON.parse(atob(params.get('d')))); }catch(e){}
+    } else {
+      try{ var s=localStorage.getItem('temple_v5'); if(s) Object.assign(state,JSON.parse(s)); }catch(e){}
+    }
+    showPage('public');
+    renderPublicBoard();
+    return;
+  }
+  // Admin mode
+  try{ var s=localStorage.getItem('temple_v5'); if(s) Object.assign(state,JSON.parse(s)); }catch(e){}
+  syncInputs(); buildMonthTable(); buildDetailEditor(); renderPublicBoard();
+};
+ 
+function syncInputs(){
+  document.getElementById('inp-year').value=state.year;
+  document.getElementById('inp-target').value=state.target;
+  document.getElementById('inp-raised').value=state.raised;
+  document.getElementById('inp-start').value=state.startDate||'2025-01-01';
+  document.getElementById('inp-end').value=state.endDate||'2025-12-31';
+  document.getElementById('inp-date').value=state.updateDate;
+  document.getElementById('inp-account').value=state.accountInfo||'';
+  document.getElementById('inp-share-url').value=state.shareUrl||'';
+}
+ 
+function readInputs(){
+  state.year=document.getElementById('inp-year').value.trim()||'2025';
+  state.target=parseFloat(document.getElementById('inp-target').value)||0;
+  state.raised=parseFloat(document.getElementById('inp-raised').value)||0;
+  state.startDate=document.getElementById('inp-start').value;
+  state.endDate=document.getElementById('inp-end').value;
+  state.updateDate=document.getElementById('inp-date').value;
+  state.accountInfo=document.getElementById('inp-account').value;
+  state.shareUrl=document.getElementById('inp-share-url').value.trim();
+  for(var i=0;i<12;i++){
+    var v=document.getElementById('month-'+i).value;
+    state.monthData[i]=(v==='')?null:parseFloat(v);
+  }
+  readDetailRows();
+}
+ 
+/* ── Month table ── */
+function buildMonthTable(){
+  var tb=document.getElementById('month-table-body'); tb.innerHTML='';
+  MONTHS.forEach(function(m,i){
+    var v=(state.monthData[i]!==null&&state.monthData[i]!==undefined)?state.monthData[i]:'';
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+m+'</td><td><input class="m-input" type="number" id="month-'+i+'" value="'+v+'" placeholder="—" min="0"></td>';
+    tb.appendChild(tr);
+  });
+}
+ 
+/* ── Detail editor ── */
+function buildDetailEditor(){
+  var tb=document.getElementById('detail-editor-body'); tb.innerHTML='';
+  (state.details||[]).forEach(function(row,i){ renderDetailEditorRow(i,row); });
+}
+function renderDetailEditorRow(i,row){
+  var tb=document.getElementById('detail-editor-body');
+  var tr=document.createElement('tr'); tr.id='de-row-'+i;
+  var d=row&&row.date?row.date:'';
+  var a=row&&row.amount?row.amount:'';
+  tr.innerHTML=
+    '<td><input class="de-input" type="date" id="de-date-'+i+'" value="'+d+'"></td>'+
+    '<td><input class="de-input amt" type="number" id="de-amt-'+i+'" value="'+a+'" placeholder="0" min="0"></td>'+
+    '<td><button class="del-btn" onclick="removeDetailRow(\''+i+'\')">✕</button></td>';
+  tb.appendChild(tr);
+}
+function addDetailRow(){
+  readDetailRows();
+  var uid=Date.now()+'';
+  state.details.push({date:'',amount:0});
+  buildDetailEditor();
+  var tb=document.getElementById('detail-editor-body');
+  if(tb.lastChild) tb.lastChild.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function removeDetailRow(rid){
+  readDetailRows();
+  var rows=document.getElementById('detail-editor-body').querySelectorAll('tr');
+  var idx=-1;
+  rows.forEach(function(r,n){ if(r.id==='de-row-'+rid) idx=n; });
+  if(idx>=0&&idx<state.details.length) state.details.splice(idx,1);
+  buildDetailEditor();
+}
+function readDetailRows(){
+  var rows=document.getElementById('detail-editor-body').querySelectorAll('tr');
+  var arr=[];
+  rows.forEach(function(tr){
+    var id=tr.id.replace('de-row-','');
+    var d=document.getElementById('de-date-'+id);
+    var a=document.getElementById('de-amt-'+id);
+    if(d&&a) arr.push({date:d.value,amount:parseFloat(a.value)||0});
+  });
+  state.details=arr;
+}
+ 
+/* ── Days left calculation ── */
+function calcDaysLeft(){
+  var today=new Date(); today.setHours(0,0,0,0);
+  var end=state.endDate?new Date(state.endDate):new Date(parseInt(state.year)||today.getFullYear(),11,31);
+  end.setHours(0,0,0,0);
+  return Math.max(0,Math.ceil((end-today)/86400000));
+}
+ 
+/* ── Save ── */
+function saveSettings(){
+  readInputs();
+  try{ localStorage.setItem('temple_v5',JSON.stringify(state)); }catch(e){}
+  buildMonthTable(); buildDetailEditor(); renderPublicBoard();
+  showToast('✅ 設定已儲存！');
+}
+ 
+/* ── Render public board ── */
+function renderPublicBoard(){
+  var pct=state.target>0?Math.min(100,(state.raised/state.target)*100):0;
+  var diff=Math.max(0,state.target-state.raised);
+  var daysLeft=calcDaysLeft();
+  var dp=state.updateDate?state.updateDate.split('-'):['2025','05','05'];
+ 
+  document.getElementById('pub-year').textContent=state.year;
+  document.getElementById('pub-target').textContent='$'+state.target.toLocaleString();
+  document.getElementById('pub-raised').textContent='$'+state.raised.toLocaleString();
+  document.getElementById('pub-rate').textContent=pct.toFixed(1)+'%';
+  document.getElementById('pub-pct-lbl').textContent=pct.toFixed(1)+'%';
+  document.getElementById('pub-update-date').textContent=dp.join('/');
+  document.getElementById('pub-prog-note').textContent=
+    '距募款結束尚差 $'+diff.toLocaleString()+' · 剩餘 '+daysLeft+' 天';
+  document.getElementById('pub-account-info').textContent=state.accountInfo||'（尚未設定）';
+  setTimeout(function(){ document.getElementById('pub-prog-fill').style.width=pct.toFixed(1)+'%'; },120);
+ 
+  // chart
+  var mt=state.target>0?Math.round(state.target/12):0;
+  var ctx=document.getElementById('pub-chart').getContext('2d');
+  if(chartInst){ chartInst.destroy(); }
+  chartInst=new Chart(ctx,{
+    type:'bar',
+    data:{labels:MONTHS,datasets:[
+      {label:'當月了愿',data:state.monthData,backgroundColor:'#C8A46A',borderRadius:5,maxBarThickness:22},
+      {label:'月度目標基準',data:Array(12).fill(mt),type:'line',borderColor:'#8B6B3D',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false,tension:0}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return '$'+(c.raw||0).toLocaleString();}}}},scales:{x:{ticks:{color:'#7A6A54',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},y:{ticks:{color:'#7A6A54',font:{size:11},callback:function(v){return '$'+(v/1000).toFixed(0)+'k';}},grid:{color:'rgba(0,0,0,0.05)'},min:0}}}
+  });
+ 
+  // detail
+  var tbody=document.getElementById('pub-detail-body');
+  var details=state.details||[];
+  if(details.length===0){
+    tbody.innerHTML='<tr><td colspan="2" class="detail-empty">尚無明細資料</td></tr>';
+  } else {
+    tbody.innerHTML='';
+    details.forEach(function(row){
+      var dStr='—';
+      if(row.date){var p=row.date.split('-');dStr=p[0]+'/'+p[1]+'/'+p[2];}
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td>'+dStr+'</td><td style="text-align:right;font-weight:600;color:var(--gold);">$'+(row.amount||0).toLocaleString()+'</td>';
+      tbody.appendChild(tr);
+    });
+  }
+}
+ 
+/* ── Copy share URL ── */
+function copyShareUrl(){
+  var url=document.getElementById('inp-share-url').value.trim();
+  if(!url){ showToast('⚠ 請先填入看板網址'); return; }
+  copyText(url);
+  showToast('🔗 網址已複製！');
+}
+function copyText(t){
+  if(navigator.clipboard){ navigator.clipboard.writeText(t); return; }
+  var ta=document.createElement('textarea'); ta.value=t;
+  document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+}
+ 
+/* ── Build standalone PUBLIC-ONLY HTML ── */
+function buildPublicHTML(){
+  var s=state;
+  var pct=s.target>0?Math.min(100,(s.raised/s.target)*100):0;
+  var diff=Math.max(0,s.target-s.raised);
+  var daysLeft=calcDaysLeft();
+  var dp=s.updateDate?s.updateDate.split('-'):['2025','05','05'];
+  var mt=s.target>0?Math.round(s.target/12):0;
+  var mdJSON=JSON.stringify(s.monthData);
+  var accountEsc=(s.accountInfo||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+ 
+  var detailRows='';
+  if(!s.details||s.details.length===0){
+    detailRows='<tr><td colspan="2" style="text-align:center;color:#7A6A54;font-size:13px;padding:1.5rem 0;">尚無明細資料</td></tr>';
+  } else {
+    s.details.forEach(function(row){
+      var dStr='—';
+      if(row.date){var p=row.date.split('-');dStr=p[0]+'/'+p[1]+'/'+p[2];}
+      detailRows+='<tr><td>'+dStr+'</td><td>$'+(row.amount||0).toLocaleString()+'</td></tr>';
+    });
+  }
+ 
+  return `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>九紫金線長老院 — 佛堂籌備基金 ${s.year}年度</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>
+<style>
+:root{--gold:#8B6B3D;--gold-light:#C8A46A;--gold-pale:#EDE0CC;--cream:#FAF7F2;--cream-dark:#F0EAE0;--text:#2C2416;--text-sub:#7A6A54;--border:#DDD0BB;--r:14px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100%;background:var(--cream);color:var(--text);font-family:'Noto Sans TC',sans-serif;}
+.wrap{max-width:600px;margin:0 auto;padding:2.5rem 1rem 3rem;}
+.header{text-align:center;padding:1.5rem 0 1.8rem;}
+.main-title{font-family:'Noto Serif TC',serif;font-size:21px;font-weight:900;letter-spacing:0.1em;line-height:1.5;}
+.divider{width:44px;height:2px;background:var(--gold);margin:12px auto;border-radius:2px;}
+.subtitle{font-size:13px;color:var(--text-sub);letter-spacing:0.05em;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.1rem;}
+.mcard{background:#fff;border-radius:var(--r);padding:1.1rem .8rem;text-align:center;border:1px solid var(--border);box-shadow:0 2px 16px rgba(139,107,61,.1);}
+.mlbl{font-size:11px;color:var(--text-sub);letter-spacing:.04em;margin-bottom:8px;}
+.mval{font-size:21px;font-weight:700;color:var(--text);line-height:1;}
+.mval.g{color:var(--gold);}
+.munit{font-size:11px;color:var(--text-sub);margin-top:4px;}
+.sec{background:#fff;border-radius:var(--r);padding:1.2rem 1.3rem;margin-bottom:1.1rem;border:1px solid var(--border);box-shadow:0 2px 16px rgba(139,107,61,.1);}
+.stitle{font-size:14px;font-weight:700;margin-bottom:12px;}
+.prow{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.plbl{font-size:14px;font-weight:700;}
+.ppct{font-size:14px;font-weight:700;color:var(--gold);}
+.track{background:var(--cream-dark);border-radius:99px;height:11px;overflow:hidden;}
+.fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold-light),var(--gold));transition:width 1.4s cubic-bezier(.4,0,.2,1);}
+.pnote{font-size:12px;color:var(--text-sub);margin-top:8px;}
+.leg{display:flex;gap:14px;margin-bottom:10px;}
+.li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-sub);}
+.ld{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+.lline{width:18px;height:0;border-top:2px dashed #8B6B3D;opacity:.6;}
+.dt{width:100%;border-collapse:collapse;}
+.dt thead tr{border-bottom:1.5px solid var(--border);}
+.dt th{font-size:11px;font-weight:600;color:var(--text-sub);padding:7px 8px;text-align:left;letter-spacing:.03em;}
+.dt th:last-child,.dt td:last-child{text-align:right;}
+.dt tbody tr{border-bottom:1px solid rgba(221,208,187,.35);}
+.dt tbody tr:last-child{border-bottom:none;}
+.dt td{font-size:13px;padding:8px 8px;}
+.dt td:first-child{color:var(--text-sub);font-size:12px;white-space:nowrap;}
+.dt td:last-child{font-weight:600;color:var(--gold);}
+.acct{background:linear-gradient(135deg,#fdf6ec,#f5e8d0);border:1.5px solid var(--gold-pale);border-radius:var(--r);padding:1.2rem 1.3rem;margin-bottom:1.1rem;}
+.acct-title{font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;color:var(--gold);margin-bottom:10px;}
+.acct-info{font-size:13px;color:var(--text);line-height:2;white-space:pre-wrap;word-break:break-all;}
+.footer{text-align:center;font-size:11px;color:var(--text-sub);line-height:1.8;}
+.frow{display:flex;justify-content:space-between;font-size:11px;color:var(--text-sub);margin-top:8px;}
+@media(max-width:480px){.grid3{grid-template-columns:repeat(2,1fr);}.frow{flex-direction:column;gap:2px;text-align:center;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="header"><div class="main-title">九紫金線長老院\u3000佛堂籌備基金</div><div class="divider"></div><div class="subtitle">了愿透明化專區 · ${s.year}年度公開看板</div></div>
+<div class="grid3">
+<div class="mcard"><div class="mlbl">年度目標金額</div><div class="mval g">$${s.target.toLocaleString()}</div><div class="munit">新台幣</div></div>
+<div class="mcard"><div class="mlbl">了愿金額</div><div class="mval">$${s.raised.toLocaleString()}</div><div class="munit">新台幣</div></div>
+<div class="mcard"><div class="mlbl">達成率</div><div class="mval g">${pct.toFixed(1)}%</div><div class="munit">累計至今</div></div>
+</div>
+<div class="sec"><div class="prow"><span class="plbl">整體募款進度</span><span class="ppct">${pct.toFixed(1)}%</span></div><div class="track"><div class="fill" id="fill" style="width:0%"></div></div><div class="pnote">距募款結束尚差 $${diff.toLocaleString()} · 剩餘 ${daysLeft} 天</div></div>
+<div class="sec"><div class="stitle">月度募款走勢</div><div class="leg"><div class="li"><div class="ld" style="background:#C8A46A"></div>當月了愿</div><div class="li"><div class="lline"></div>月度目標基準</div></div><div style="position:relative;height:180px;"><canvas id="chart"></canvas></div></div>
+<div class="sec"><div class="stitle">了愿明細</div><table class="dt"><thead><tr><th>日期</th><th>了愿金額</th></tr></thead><tbody>${detailRows}</tbody></table></div>
+<div class="acct"><div class="acct-title">🏦 了愿專款帳戶</div><div class="acct-info">${accountEsc}</div></div>
+<div class="footer">所有款項專款專用 · 每季更新帳務明細 · 資料更新時間：${dp.join('/')}</div>
+<div class="frow"><span>九紫金線長老院-財務部</span><span>本專區每季更新</span></div>
+</div>
+<script>
+setTimeout(function(){document.getElementById('fill').style.width='${pct.toFixed(1)}%';},120);
+new Chart(document.getElementById('chart').getContext('2d'),{type:'bar',data:{labels:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],datasets:[{label:'當月了愿',data:${mdJSON},backgroundColor:'#C8A46A',borderRadius:5,maxBarThickness:22},{label:'月度目標基準',data:Array(12).fill(${mt}),type:'line',borderColor:'#8B6B3D',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false,tension:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return '$'+(c.raw||0).toLocaleString();}}}},scales:{x:{ticks:{color:'#7A6A54',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},y:{ticks:{color:'#7A6A54',font:{size:11},callback:function(v){return '$'+(v/1000).toFixed(0)+'k';}},grid:{color:'rgba(0,0,0,0.05)'},min:0}}}});
+<\/script>
+</body>
+</html>`;
+}
+ 
+function downloadPublicBoard(){
+  readInputs();
+  try{ localStorage.setItem('temple_v5',JSON.stringify(state)); }catch(e){}
+  renderPublicBoard();
+  var html=buildPublicHTML();
+  var blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='佛堂籌備基金_'+state.year+'年度公開看板.html';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
+  showToast('✅ 公開看板已下載！對方只能看前台。');
+}
+ 
+function previewPublicBoard(){
+  readInputs();
+  try{ localStorage.setItem('temple_v5',JSON.stringify(state)); }catch(e){}
+  renderPublicBoard();
+  var html=buildPublicHTML();
+  var blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  window.open(URL.createObjectURL(blob),'_blank');
+}
+ 
+function showPage(name){
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('page-'+name).classList.add('active');
+  if(name==='admin'){ buildMonthTable(); buildDetailEditor(); syncInputs(); }
+  if(name==='public') renderPublicBoard();
+  window.scrollTo(0,0);
+}
+ 
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); },3000);
+}
+</script>
+</body>
+</html>
